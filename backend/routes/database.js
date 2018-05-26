@@ -13,13 +13,13 @@ var pool = mysql.createPool({
 const fetchData = (sqlQuery, callback) => {
 	pool.getConnection((err, connection) => {
 		if (err){
-			console.log(err);
+			callback(err);
 		} else{
 			connection.query(sqlQuery,(err, rows, fields) => {
 				if (err){
-					console.log(err)
+					callback(err);
 				} else{
-					callback(rows)
+					callback(null, rows)
 				}
 				connection.release();
 			})
@@ -31,13 +31,13 @@ const fetchData = (sqlQuery, callback) => {
 const insertData = (sqlQuery, callback) => {
 	pool.getConnection((err, connection) => {
 		if (err) {
-			console.log(err);
+			callback(err);
 		} else{
 			connection.query(sqlQuery, (err, results)=> {
 				if (err){
-					console.log(err)
+					callback(err);
 				} else{
-					callback(results);
+					callback(err, results);
 				}
 				connection.release();
 			})

@@ -1,0 +1,26 @@
+{
+  "name": "optima-assignment",
+  "version": "1.0.0",
+  "description": "assigmnet for express",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/komaljit/Optima_assignment.git"
+  },
+  "author": "komaljit",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/komaljit/Optima_assignment/issues"
+  },
+  "homepage": "https://github.com/komaljit/Optima_assignment#readme",
+  "dependencies": {
+    "express": "^4.16.3",
+    "morgan": "^1.9.0",
+    "multer": "^1.3.0",
+    "mysql": "^2.15.0"
+  }
+}
