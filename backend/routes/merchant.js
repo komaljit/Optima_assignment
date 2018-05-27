@@ -85,11 +85,23 @@ router.post('/register', (request, response) => {
 		}
 
 	})
-
 })
 
 
-
+// controller to give requested information about a merchantId
+router.get('/profile', (request, response) => {
+	var merchanrId = request.query.merchanrId;
+	sql.fetchData(query, request, (err, results) => {
+		if (err) {
+			response.status(400).json('invalid request')
+			console.log(err);
+		}
+		else {
+			console.log(results);
+			response.status(204).json({dataparameters: query})
+		}
+	})
+})
 
 
 exports.router = router;
