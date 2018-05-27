@@ -1,7 +1,8 @@
-var mysql = require('mysql');
+const mysql = require('mysql');
+
 
 // mysql pool to get connection whiile interacting with database 
-var pool = mysql.createPool({
+const pool = mysql.createPool({
 	host: '127.0.0.1',
 	port: 3306,
 	user: 'root',
@@ -9,15 +10,18 @@ var pool = mysql.createPool({
 	database: 'Optima'
 });
 
+
 // function to query data from the database
-const fetchData = (sqlQuery, callback) => {
+const fetchData = (request, callback) => {
 	pool.getConnection((err, connection) => {
 		if (err){
 			callback(err);
 		} else{
+			const sqlQuery = "SELECT * FROM User WHERE merchantId = " + connection.escape(merchantId);
+			console.log(sqlQuery);
 			connection.query(sqlQuery,(err, rows, fields) => {
 				if (err){
-					callback(err);
+					callback(err, null);
 				} else{
 					callback(null, rows)
 				}
@@ -27,23 +31,32 @@ const fetchData = (sqlQuery, callback) => {
 	})
 };
 
+
 // function to insert data into the database
-const insertData = (sqlQuery, callback) => {
+const insertData = (request, callback) => {
 	pool.getConnection((err, connection) => {
 		if (err) {
 			callback(err);
 		} else{
+			const merchantId = request.body.merchantId;
+			const Name = request.body.Name;
+			const DOB = request.body.DOB;
+			const selfiePath = request.file.filename;
+			const sqlQuery = "INSERT INTO User (merchantId, Name, DOB, selfiePath) VALUES (" + 
+				connection.escape(merchantId) + "," + connection.escape(Name) + "," + connection.escape(DOB) + "," + connection.escape(selfiePath) +")";
+			// console.log(sqlQuery);
 			connection.query(sqlQuery, (err, results)=> {
 				if (err){
 					callback(err);
+					connection.release();
 				} else{
-					callback(err, results);
+					callback(null, results);
 				}
-				connection.release();
 			})
 		}
 	})
 }
+
 
 module.exports.insertData = insertData;
 module.exports.fetchData = fetchData;
