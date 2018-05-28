@@ -12,13 +12,13 @@ const pool = mysql.createPool({
 
 
 // function to query data from the database
-const fetchData = (request, callback) => {
+const fetchData = (merchantId, callback) => {
 	pool.getConnection((err, connection) => {
 		if (err){
 			callback(err);
 		} else{
-			const sqlQuery = "SELECT * FROM User WHERE merchantId = " + connection.escape(merchantId);
-			console.log(sqlQuery);
+			const sqlQuery = "SELECT merchantId, Name, DOB, selfiePath FROM User WHERE merchantId = " + connection.escape(merchantId);
+			// console.log(sqlQuery);
 			connection.query(sqlQuery,(err, rows, fields) => {
 				if (err){
 					callback(err, null);
@@ -32,6 +32,7 @@ const fetchData = (request, callback) => {
 };
 
 
+
 // function to insert data into the database
 const insertData = (request, callback) => {
 	pool.getConnection((err, connection) => {
@@ -43,7 +44,7 @@ const insertData = (request, callback) => {
 			const DOB = request.body.DOB;
 			const selfiePath = request.file.filename;
 			const sqlQuery = "INSERT INTO User (merchantId, Name, DOB, selfiePath) VALUES (" + 
-				connection.escape(merchantId) + "," + connection.escape(Name) + "," + connection.escape(DOB) + "," + connection.escape(selfiePath) +")";
+			connection.escape(merchantId) + "," + connection.escape(Name) + "," + connection.escape(DOB) + "," + connection.escape(selfiePath) +")";
 			// console.log(sqlQuery);
 			connection.query(sqlQuery, (err, results)=> {
 				if (err){

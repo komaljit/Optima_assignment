@@ -3,6 +3,7 @@ const router = express.Router();
 const sql = require('./database');
 const path = require('path');
 const fs = require('fs');
+const assert = require('assert');
 const multer = require('multer');
 
 
@@ -14,10 +15,11 @@ const selfieExtensionValidator = (request, file, callback) =>{
 	console.log(file.originalname);
 	var fileExt = path.extname(file.originalname).toUpperCase();
 	if (!fileExt.match(/\.(JPG|JPEG|PNG|GIF)$/)) {
-        return callback(new Error('not an image'), false);
-    }
-    callback(null, true);
+		return callback(new Error('not an image'), false);
+	}
+	callback(null, true);
 }
+
 
 
 var storage = multer.diskStorage({
@@ -27,8 +29,9 @@ var storage = multer.diskStorage({
 	filename: function(request, file, callback) {
 		console.log(file);
 		callback(null, Date.now() + file.originalname)
-	}
+	},
 })
+
 
 
 const upload = multer({
@@ -37,71 +40,72 @@ const upload = multer({
 	}).single('file');
 
 
-// function to save merchant photo in media folder
-const selfieUpload = (filePath, callback) => {
-	fs.writeFile(filePath, "Hey ", function(err) {
-	    if(err) {
-	        callback(err)
-	    } else{
-	    	console.log("The file was saved!");
-	    	callback(true);
-	    }
-	});
-};
-
 
 // controller to get parameters required to make POST API call
-router.get('/', (request, response) => {
+router.get('/', (request, response, next) => {
 	response.json({'dataparameters': ['Name', 'DOB', 'Selfie']})
 })
 
 
+
+const postRequestvalidator = (request) => {
+	try{
+		assert(request.body.merchantId != undefined, "here it is");
+		return true
+	} catch (err){
+		console.log(err);
+		return false
+	}
+}
+
+
 // Controller for registration of a merchant
-router.post('/register', (request, response) => {
+router.post('/', (request, response) => {
 	upload(request, response, (err) => {
 		if (err){
 			console.log(err);
-			response.status(400).json({"status": "false"});                 // file is not a picture
+			response.status(404).json({"status": "false"});                 // file is not a picture
 		} else {
 			console.log(request.file);
 			sql.insertData(request, (err) => {
 				if (err) {
 					console.log(err);
-					response.status(400).json({"status": "false"});          // response.status(400).json('MerchantId already exists');
+					response.status(404).json({"status": "false"});           // response.status(400).json('MerchantId already exists');
 				} else{
-					var filePath = path.join(__dirname, '../media/', request.body.merchantId);
-					console.log(filePath);
-					selfieUpload(filePath, (err) =>{
-						if (err){
-							console.log(err);
-							response.status(400).json({"status": "false"});  // issues while saving file
-						}
-						else {
-							response.status(204).json({"status": "true"});    // details saved succesfully
-						}
-					})
+					response.status(204).json({"status": "true"});  
 				}
 			})
-		}
 
+		}
 	})
 })
 
 
+
 // controller to give requested information about a merchantId
-router.get('/profile', (request, response) => {
-	var merchanrId = request.query.merchanrId;
-	sql.fetchData(query, request, (err, results) => {
+router.get('/getdetails', (request, response) => {
+	var merchantId = request.query.merchantId;
+	if(merchantId === undefined){
+		response.status(400).json('invalid request');                          // merchanitId not provided
+	}
+	sql.fetchData(merchantId, (err, results) => {
 		if (err) {
 			response.status(400).json('invalid request')
 			console.log(err);
 		}
 		else {
-			console.log(results);
-			response.status(204).json({dataparameters: query})
+			if (results.length === 0){ 
+				response.status(404).json();                                     // merchant not found
+			} else{
+				// console.log(results[0].selfiePath);
+				var imageAsBase64 = fs.readFileSync('./media/'+results[0].selfiePath, 'base64');
+				// console.log(imageAsBase64);	
+				response.json({'dataparameters': [{Name:results[0].Name}, {DOB: results[0].DOB}, {selfie: imageAsBase64}]});
+			}
 		}
 	})
 })
+
 
 
 exports.router = router;
