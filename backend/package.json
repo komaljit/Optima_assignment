@@ -1,7 +1,7 @@
 {
   "name": "optimaassignment",
   "version": "1.0.0",
-  "description": "assigmnet for express",
+  "description": "assignment for express",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
