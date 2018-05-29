@@ -6,7 +6,6 @@ const logger = require('morgan');
 const path = require('path');
 const invalidRequest = require('./invalid_request');
 
-
 const app = express();
 
 app.use(logger('dev'));
